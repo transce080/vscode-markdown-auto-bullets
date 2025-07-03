@@ -1,0 +1,30 @@
+{
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "ms-vscode.extension-test-runner"
+    ]
+  },
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "launch": {
+    "configurations": [
+      {
+        "name": "Run Extension",
+        "program": "${workspaceFolder}/app.js",
+        "request": "launch",
+        "type": "extensionHost"
+      }
+    ],
+    "version": "0.2.0"
+  },
+  "settings": {
+    "cSpell.ignoreWords": [
+      "dbaeumer"
+    ],
+    "editor.formatOnSave": true
+  }
+}
