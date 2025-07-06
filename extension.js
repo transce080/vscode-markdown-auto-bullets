@@ -1,36 +1,63 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode')
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const BULLET_REGEX = /^\s*([+*-]\s+)/
+const RETURN = '\n'
 
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
-
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "markdown-auto-bullets" is now active!')
-
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('markdown-auto-bullets.helloWorld', function () {
-    // The code you place here will be executed every time your command is executed
-
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World from Markdown Automatic Bullet Points!')
-  })
-
-  context.subscriptions.push(disposable)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('type', async (args) => {
+      addBullet(args)
+      await vscode.commands.executeCommand('default:type', args)
+    })
+  )
 }
 
-// This method is called when your extension is deactivated
+function addBullet(args) {
+  try {
+    if (!isEnterKey(args)) return
+
+    const editor = vscode.window.activeTextEditor
+    if (!isMarkdown(editor)) return
+
+    const cursor = getCursor(editor)
+    const lineText = getText(editor, cursor.line)
+    if (!lineText) return
+
+    const bullet = getBullet(lineText)
+    if (!bullet) return
+
+    args.text += bullet
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+function getBullet(text) {
+  const match = text.match(BULLET_REGEX)
+  return match && (match.length > 1) ? match[1] : null
+}
+
+function getCursor(editor) {
+  return editor.selection.active
+}
+
+function getText(editor, line) {
+  return editor.document.lineAt(line).text
+}
+
+function isEnterKey(args) {
+  return args.text == RETURN
+}
+
+function isMarkdown(editor) {
+  return editor.document.languageId == 'markdown'
+}
+
 function deactivate() { }
 
 module.exports = {
   activate,
-  deactivate
+  deactivate,
+  getBullet,
+  RETURN
 }
