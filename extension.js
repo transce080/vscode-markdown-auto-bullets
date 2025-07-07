@@ -1,5 +1,8 @@
 const vscode = require('vscode')
 
+const BULLET_REGEX = /^\s*([+*-]\s+)/
+const RETURN = '\n'
+
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -14,7 +17,14 @@ function activate(context) {
 
 function deactivate() { }
 
+function getBullet(text) {
+  const match = text.match(BULLET_REGEX)
+  return match && (match.length > 1) ? match[1] : null
+}
+
 module.exports = {
   activate,
-  deactivate
+  deactivate,
+  getBullet,
+  RETURN
 }
