@@ -1,15 +1,24 @@
+const { getBullet, RETURN } = require('../extension')
 const assert = require('assert')
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-const vscode = require('vscode')
-// const myExtension = require('../extension');
+const testDepthOne = '  * Lorem Ipsum'
+const testDepthTwo = '    + Lorem Ipsum'
+const testDepthZero = '- Lorem Ipsum'
+const testLongIndent = '-  Lorem Ipsum'
+const testNoBullets = 'Lorem Ipsum'
+const testNoBulletsWithDashes = 'Lorem Ipsum - Dolor Sit Amet'
+const testNoBulletsWithPlus = 'Lorem + Ipsum Dolor Sit Amet'
+const testNoBulletsWithStar = 'Lorem Ipsum Dolor * Sit Amet'
 
-suite('Extension Test Suite', () => {
-  vscode.window.showInformationMessage('Start all tests.')
-
-  test('Sample test', () => {
-    assert.strictEqual(-1, [1, 2, 3].indexOf(5))
-    assert.strictEqual(-1, [1, 2, 3].indexOf(0))
+suite('Function Tests', () => {
+  test('getBullet returns correct bullet type and indent length', () => {
+    assert.strictEqual(getBullet(testDepthOne), '* ')
+    assert.strictEqual(getBullet(testDepthTwo), '+ ')
+    assert.strictEqual(getBullet(testDepthZero), '- ')
+    assert.strictEqual(getBullet(testLongIndent), '-  ')
+    assert.strictEqual(getBullet(testNoBullets), null)
+    assert.strictEqual(getBullet(testNoBulletsWithDashes), null)
+    assert.strictEqual(getBullet(testNoBulletsWithPlus), null)
+    assert.strictEqual(getBullet(testNoBulletsWithStar), null)
   })
 })
