@@ -2,6 +2,9 @@ const { getBullet, RETURN } = require('../extension')
 const assert = require('assert')
 const vscode = require('vscode')
 
+const LF = vscode.EndOfLine.LF
+const CRLF = vscode.EndOfLine.CRLF
+
 const testDepthOne = '  * Lorem Ipsum'
 const testDepthTwo = '    + Lorem Ipsum'
 const testDepthZero = '- Lorem Ipsum'
@@ -25,13 +28,18 @@ suite('Function Tests', () => {
 })
 
 suite('Execution Tests', () => {
-  async function runTest(content, language = 'markdown') {
+  async function runTest(content, language = 'markdown', lineEnding = LF) {
     const file = await vscode.workspace.openTextDocument({ content: content })
     const editor = await vscode.window.showTextDocument(file)
 
-    // Set language mode
     if (language) {
       await vscode.languages.setTextDocumentLanguage(file, language)
+    }
+
+    if (lineEnding) {
+      await editor.edit(editBuilder => {
+        editBuilder.setEndOfLine(lineEnding)
+      })
     }
 
     // Move cursor to end of line
@@ -52,20 +60,38 @@ suite('Execution Tests', () => {
     assert.strictEqual(newLine, '', 'New line should be blank')
   })
 
-  test('Inserts dash bullet point', async () => {
+  test('Inserts dash bullet point LF', async () => {
     const newLine = await runTest(testDepthZero)
     const index = testDepthZero.indexOf('-')
     assert.strictEqual(newLine, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
   })
 
-  test('Inserts star bullet point', async () => {
+  test('Inserts dash bullet point CRLF', async () => {
+    const newLine = await runTest(testDepthZero, 'markdown', CRLF)
+    const index = testDepthZero.indexOf('-')
+    assert.strictEqual(newLine, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+  })
+
+  test('Inserts star bullet point LF', async () => {
     const newLine = await runTest(testDepthOne)
     const index = testDepthOne.indexOf('*')
     assert.strictEqual(newLine, testDepthOne.slice(0, index + 2), 'New line should start with star bullet')
   })
 
-  test('Inserts plus bullet point', async () => {
+  test('Inserts star bullet point CRLF', async () => {
+    const newLine = await runTest(testDepthOne, 'markdown', CRLF)
+    const index = testDepthOne.indexOf('*')
+    assert.strictEqual(newLine, testDepthOne.slice(0, index + 2), 'New line should start with star bullet')
+  })
+
+  test('Inserts plus bullet point LF', async () => {
     const newLine = await runTest(testDepthTwo)
+    const index = testDepthTwo.indexOf('+')
+    assert.strictEqual(newLine, testDepthTwo.slice(0, index + 2), 'New line should start with plus bullet')
+  })
+
+  test('Inserts plus bullet point CRLF', async () => {
+    const newLine = await runTest(testDepthTwo, 'markdown', CRLF)
     const index = testDepthTwo.indexOf('+')
     assert.strictEqual(newLine, testDepthTwo.slice(0, index + 2), 'New line should start with plus bullet')
   })
