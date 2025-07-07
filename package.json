@@ -1,17 +1,32 @@
 {
   "name": "markdown-auto-bullets",
+  "author": "Jason Lonsberry",
   "displayName": "Markdown Automatic Bullet Points",
-  "description": "Markdown Automatic Bullet Points",
-  "version": "0.0.1",
+  "description": "Automatically add bullet points when editing in Markdown.",
+  "keywords": [
+    "auto",
+    "automated",
+    "bullets",
+    "list",
+    "md"
+  ],
+  "license": "SEE LICENSE IN ./LICENSE",
+  "publisher": "jason-lonsberry",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/transce080/vscode-markdown-auto-bullets/"
+  },
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.101.0"
   },
   "categories": [
-    "Other"
+    "Formatters"
   ],
   "activationEvents": [
     "onLanguage:markdown"
   ],
+  "browser": "./src/extension.js",
   "main": "./extension.js",
   "contributes": {
     "commands": [

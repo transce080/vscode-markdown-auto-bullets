@@ -17,6 +17,17 @@
         "program": "${workspaceFolder}/app.js",
         "request": "launch",
         "type": "extensionHost"
+      },
+      {
+        "type": "node",
+        "request": "attach",
+        "name": "Attach to Process",
+        "skipFiles": [
+          ".vscode-test/**",
+          "**/resources/app/out/vs/workbench/api/**"
+          "<node_internals>/**",
+          "node_modules/**"
+        ]
       }
     ],
     "version": "0.2.0"
