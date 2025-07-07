@@ -6,13 +6,12 @@ export default [
   {
     files: ["**/*.js"],
     languageOptions: {
+      ecmaVersion: 2022,
       globals: {
         ...globals.commonjs,
         ...globals.node,
         ...globals.mocha,
       },
-
-      ecmaVersion: 2022,
       sourceType: "module",
     }
   }]
