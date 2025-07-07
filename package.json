@@ -9,13 +9,17 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "markdown-auto-bullets.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "type",
+        "title": "Intercept Typing Event"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
