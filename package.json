@@ -2,14 +2,17 @@
   "name": "markdown-auto-bullets",
   "displayName": "Markdown Automatic Bullet Points",
   "description": "Markdown Automatic Bullet Points",
-  "version": "0.0.1",
+  "publisher": "Jason Lonsberry (transce080)",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.101.0"
   },
   "categories": [
-    "Other"
+    "Formatters"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
