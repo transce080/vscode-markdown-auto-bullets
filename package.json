@@ -24,7 +24,8 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "build": "mkdir -p deploy && npx vsce package --no-dependencies && mv *.vsix deploy/"
   },
   "devDependencies": {
     "@types/vscode": "^1.101.0",
