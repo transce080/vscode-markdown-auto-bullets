@@ -1,4 +1,4 @@
-const { getBullet, RETURN } = require('../extension')
+const { getBullet, RETURN } = require('../src/extension')
 const assert = require('assert')
 const vscode = require('vscode')
 
@@ -30,11 +30,12 @@ suite('Function Tests', () => {
 suite('Execution Tests', () => {
   async function runTest(content, language = 'markdown', lineEnding = LF) {
     const file = await vscode.workspace.openTextDocument({ content: content })
-    const editor = await vscode.window.showTextDocument(file)
 
     if (language) {
       await vscode.languages.setTextDocumentLanguage(file, language)
     }
+
+    const editor = await vscode.window.showTextDocument(file)
 
     if (lineEnding) {
       await editor.edit(editBuilder => {
