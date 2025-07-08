@@ -29,19 +29,12 @@ suite('Function Tests', () => {
 
 suite('Execution Tests', () => {
   async function runTest(content, language = 'markdown', lineEnding = LF) {
-    const file = await vscode.workspace.openTextDocument({ content: content })
-
-    if (language) {
-      await vscode.languages.setTextDocumentLanguage(file, language)
-    }
-
+    const file = await vscode.workspace.openTextDocument({ content: content, language: language })
     const editor = await vscode.window.showTextDocument(file)
 
-    if (lineEnding) {
-      await editor.edit(editBuilder => {
-        editBuilder.setEndOfLine(lineEnding)
-      })
-    }
+    await editor.edit(e => { e.setEndOfLine(lineEnding) })
+
+    console.log(`\nrunTest: ${editor.document.languageId} : ${editor.document.eol}`)
 
     // Move cursor to end of line
     editor.selection = new vscode.Selection(0, content.length, 0, content.length)
@@ -57,7 +50,7 @@ suite('Execution Tests', () => {
   }
 
   test('Does not insert if not markdown', async () => {
-    const newLine = await runTest(testDepthZero, null)
+    const newLine = await runTest(testDepthZero, 'plaintext')
     assert.strictEqual(newLine, '', 'New line should be blank')
   })
 
