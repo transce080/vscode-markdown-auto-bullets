@@ -1,9 +1,11 @@
+const { commands, languages, window, workspace } = require('vscode')
+const { EndOfLine, Selection } = require('vscode')
 const { getBullet, RETURN } = require('../src/extension')
 const assert = require('assert')
-const vscode = require('vscode')
 
-const LF = vscode.EndOfLine.LF
-const CRLF = vscode.EndOfLine.CRLF
+const { LF } = EndOfLine
+const { CRLF } = EndOfLine
+const WAIT_TIME = 150 // Increase wait time if you experience intermittent failures or for slower machines
 
 const testDepthOne = '  * Lorem Ipsum'
 const testDepthTwo = '    + Lorem Ipsum'
@@ -13,6 +15,32 @@ const testNoBullets = 'Lorem Ipsum'
 const testNoBulletsWithDashes = 'Lorem Ipsum - Dolor Sit Amet'
 const testNoBulletsWithPlus = 'Lorem + Ipsum Dolor Sit Amet'
 const testNoBulletsWithStar = 'Lorem Ipsum Dolor * Sit Amet'
+
+async function runTest(content, language = 'markdown', lineEnding = LF, secondLanguage = null) {
+  let document = await workspace.openTextDocument({ content, language })
+  const editor = await window.showTextDocument(document)
+
+  await editor.edit(eb => { eb.setEndOfLine(lineEnding) })
+
+  // Move cursor to end of line
+  setCursorPosition(editor, content.length, 0)
+
+  if (secondLanguage) {
+    document = await languages.setTextDocumentLanguage(document, secondLanguage)
+    await commands.executeCommand('type', { text: ' ' })
+    await new Promise(resolve => setTimeout(resolve, WAIT_TIME))
+  }
+
+  await commands.executeCommand('type', { text: RETURN })
+  const newText = document.getText().split(RETURN).pop()
+  await commands.executeCommand('workbench.action.closeAllEditors')
+
+  return newText
+}
+
+function setCursorPosition(editor, column, line) {
+  editor.selection = new Selection(line, column, line, column)
+}
 
 suite('Function Tests', () => {
   test('getBullet returns correct bullet type and indent length', () => {
@@ -28,27 +56,6 @@ suite('Function Tests', () => {
 })
 
 suite('Execution Tests', () => {
-  async function runTest(content, language = 'markdown', lineEnding = LF) {
-    const file = await vscode.workspace.openTextDocument({ content: content, language: language })
-    const editor = await vscode.window.showTextDocument(file)
-
-    await editor.edit(e => { e.setEndOfLine(lineEnding) })
-
-    console.log(`\nrunTest: ${editor.document.languageId} : ${editor.document.eol}`)
-
-    // Move cursor to end of line
-    editor.selection = new vscode.Selection(0, content.length, 0, content.length)
-
-    // Simulate pressing Enter
-    await vscode.commands.executeCommand('type', { text: RETURN })
-
-    // Get new line text
-    const lines = file.getText().split(RETURN)
-    const newLine = lines[lines.length - 1]
-
-    return newLine
-  }
-
   test('Does not insert if not markdown', async () => {
     const newLine = await runTest(testDepthZero, 'plaintext')
     assert.strictEqual(newLine, '', 'New line should be blank')
@@ -90,5 +97,41 @@ suite('Execution Tests', () => {
     assert.strictEqual(newLine, testDepthTwo.slice(0, index + 2), 'New line should start with plus bullet')
   })
 
-  return true
+  test('Stops when going from markdown to text', async () => {
+    const newLine1 = await runTest(testDepthZero)
+    const newLine2 = await runTest(testDepthZero, 'plaintext')
+    const index = testDepthZero.indexOf('-')
+
+    assert.strictEqual(newLine1, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+    assert.strictEqual(newLine2, '', 'New line should be blank')
+  })
+
+  test('Starts up after going from text to markdown', async () => {
+    const newLine1 = await runTest(testDepthZero, 'plaintext')
+    const newLine2 = await runTest(testDepthZero)
+    const index = testDepthZero.indexOf('-')
+
+    assert.strictEqual(newLine1, '', 'New line should be blank')
+    assert.strictEqual(newLine2, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+  })
+
+  test('Keeps working when going from markdown to markdown', async () => {
+    const newLine1 = await runTest(testDepthZero)
+    const newLine2 = await runTest(testDepthZero)
+    const index = testDepthZero.indexOf('-')
+
+    assert.strictEqual(newLine1, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+    assert.strictEqual(newLine2, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+  })
+
+  test('Stops when document language is changed from markdown to text', async () => {
+    const newLine = await runTest(testDepthZero, 'markdown', LF, 'plaintext')
+    assert.strictEqual(newLine, '', 'New line should be blank')
+  })
+
+  test('Starts when document language is changed from text to markdown', async () => {
+    const newLine = await runTest(testDepthZero, 'plaintext', LF, 'markdown')
+    const index = testDepthZero.indexOf('-')
+    assert.strictEqual(newLine, testDepthZero.slice(0, index + 2), 'New line should start with dash bullet')
+  })
 })
