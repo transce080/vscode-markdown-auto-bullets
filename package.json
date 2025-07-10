@@ -24,18 +24,12 @@
     "Formatters"
   ],
   "activationEvents": [
+    "onDidChangeActiveTextEditor",
+    "onDidChangeTextDocument",
     "onLanguage:markdown"
   ],
   "browser": "./src/extension.js",
-  "main": "./extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "type",
-        "title": "Intercept Typing Event"
-      }
-    ]
-  },
+  "main": "./src/extension.js",
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
