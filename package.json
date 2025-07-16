@@ -25,7 +25,7 @@
   ],
   "activationEvents": [
     "onDidChangeActiveTextEditor",
-    "onDidChangeTextDocument",
+    "onDidOpenTextDocument",
     "onLanguage:markdown"
   ],
   "browser": "./src/extension.js",
