@@ -1,5 +1,4 @@
 const { commands, window, workspace } = require('vscode')
-const { ExtensionContext, TextEditor } = require('vscode') // eslint-disable-line no-unused-vars
 const activeEditor = () => window.activeTextEditor
 
 const BULLET_REGEX = /^\s*([+*-]\s+)/u
@@ -7,13 +6,14 @@ const RETURN = '\n'
 let typeEvent = null
 
 const getTypeEvent = () => {
-  typeEvent =
+  typeEvent ||=
     commands.registerCommand('type', async (args) => {
-      console.log('!! getEvent: command type callback:', JSON.stringify(args))
+      console.log('getEvent: type callback:', JSON.stringify(args))
+      const editor = activeEditor()
 
-      if (activeEditor() && activeEditor().document && args) {
-        appendBullet(activeEditor(), args)
-      }
+      if (!editor?.document || !args) return
+
+      appendBullet(editor, args)
 
       await commands.executeCommand('default:type', args)
     })
@@ -24,19 +24,20 @@ const getTypeEvent = () => {
 function activate(context) {
   console.log('## Extension activated')
 
+  addOrRemoveEvent(context, activeEditor())
+
   context.subscriptions.push(
     window.onDidChangeActiveTextEditor(editor => {
-      if (!editor || !editor.document) return
+      if (!editor?.document) return
       console.log(`!! onDidChangeActiveTextEditor: ${editor?.document?.languageId}`)
       addOrRemoveEvent(context, editor)
     }),
-    workspace.onDidChangeTextDocument(editor => {
-      if (!editor || !editor.document) return
-      console.log(`!! onDidChangeTextDocument: ${editor?.document?.languageId} : ${editor?.contentChanges?.length}}`)
+    workspace.onDidOpenTextDocument(() => {
+      const editor = activeEditor()
+      if (!editor?.document) return
+      console.log(`!! onDidOpenTextDocument: ${editor?.document?.languageId} : ${editor?.contentChanges?.length}}`)
       addOrRemoveEvent(context, editor)
     }),
-    // TODO: try implementing onDidOpenTextDocument or onDidCloseTextDocument instead
-    getTypeEvent()
   )
 }
 
@@ -45,7 +46,6 @@ function addOrRemoveEvent(context, editor) {
 
   if (!typeEvent && isMarkdown(editor)) {
     console.log('  >> Adding typeEvent for markdown editor')
-
     context.subscriptions.push(getTypeEvent())
   } else if (typeEvent && !isMarkdown(editor)) {
     console.log('  >> Removing typeEvent for non-markdown editor')
@@ -57,10 +57,6 @@ function deactivate() {
   killTypeEvent()
 }
 
-/**
- * @param {TextEditor} editor
- * @param {any} args
- */
 function appendBullet(editor, args) {
   if (!isMarkdown(editor)) {
     console.log(`  << Aborting: Not a markdown file`)
@@ -86,7 +82,8 @@ function appendBullet(editor, args) {
 
 function getBullet(text) {
   const match = text.match(BULLET_REGEX)
-  return match && (match.length > 1) ? match[1] : null
+  if (!match) return null
+  return match[1]
 }
 
 function getCursor(editor) {
@@ -112,8 +109,10 @@ function killTypeEvent() {
 }
 
 module.exports = {
-  RETURN,
   activate,
   deactivate,
-  getBullet,
+  testExports: {
+    RETURN,
+    getBullet
+  }
 }
