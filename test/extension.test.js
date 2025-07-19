@@ -1,5 +1,6 @@
 const { commands, languages, window, workspace } = require('vscode')
-const { CRLF, LF, Selection } = require('vscode')
+const { EndOfLine, Selection } = require('vscode')
+const { CRLF, LF } = EndOfLine
 const { testExports } = require('../src/extension')
 const assert = require('assert')
 
