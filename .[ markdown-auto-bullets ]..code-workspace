@@ -24,8 +24,10 @@
         "name": "Attach to Process",
         "skipFiles": [
           ".vscode-test/**",
+          "**/.vscode/extensions/**"
+          "**/mocha/lib**",
           "**/resources/app/out/vs/workbench/api/**"
-          "<node_internals>/**",
+          "**/vs/workbench/api/node/**",
           "node_modules/**"
         ]
       }
