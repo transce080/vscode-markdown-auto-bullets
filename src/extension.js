@@ -1,39 +1,58 @@
 const { commands, window, workspace } = require('vscode')
-const activeEditor = () => window.activeTextEditor
 
 const BULLET_REGEX = /^\s*([+*-]\s+)/u
-const RETURN = '\n'
-let typeEvent = null
+const BLANK_BULLET_REGEX = /^\s*([+*-]\s*)$/u
+const ENTER_KEY = '\n'
+let _typeEvent = null
 
 const getTypeEvent = () => {
-  typeEvent ||=
+  _typeEvent ||=
     commands.registerCommand('type', async (args) => {
       console.log('getEvent: type callback:', JSON.stringify(args))
-      const editor = activeEditor()
+      const editor = window.activeTextEditor
 
       if (!editor?.document || !args) return
 
-      appendBullet(editor, args)
+      if (!isMarkdown(editor)) {
+        console.log(`  << Aborting: Not a markdown file`)
+        killTypeEvent()
+        return
+      }
+      console.log('  >> Passed isMarkdown check')
+
+      if (isEnterKey(args)) {
+        console.log('  >> Passed isEnterKey check')
+        const lineText = getLineText(editor)
+
+        if (isBulletTextBlank(lineText)) {
+          await removeLine(editor)
+          return
+        }
+
+        appendBullet(lineText, args)
+      }
 
       await commands.executeCommand('default:type', args)
     })
 
-  return typeEvent
+  return _typeEvent
 }
 
-function activate(context) {
+function activate(/* Extension API */ context) {
   console.log('## Extension activated')
 
-  addOrRemoveEvent(context, activeEditor())
+  addOrRemoveEvent(context, window.activeTextEditor)
 
   context.subscriptions.push(
+    /* When user changes documents */
     window.onDidChangeActiveTextEditor(editor => {
       if (!editor?.document) return
       console.log(`!! onDidChangeActiveTextEditor: ${editor?.document?.languageId}`)
       addOrRemoveEvent(context, editor)
     }),
+    /* When user changes doc language */
     workspace.onDidOpenTextDocument(() => {
-      const editor = activeEditor()
+      const editor = window.activeTextEditor
       if (!editor?.document) return
       console.log(`!! onDidOpenTextDocument: ${editor?.document?.languageId} : ${editor?.contentChanges?.length}}`)
       addOrRemoveEvent(context, editor)
@@ -41,13 +60,13 @@ function activate(context) {
   )
 }
 
-function addOrRemoveEvent(context, editor) {
-  console.log(`  >> addOrRemoveEvent: [typeEvent: ${!!typeEvent}] [isMarkdown: ${isMarkdown(editor)}]`)
+function addOrRemoveEvent(extensionContext, editor) {
+  console.log(`  >> addOrRemoveEvent: [typeEvent: ${!!_typeEvent}] [isMarkdown: ${isMarkdown(editor)}]`)
 
-  if (!typeEvent && isMarkdown(editor)) {
+  if (!_typeEvent && isMarkdown(editor)) {
     console.log('  >> Adding typeEvent for markdown editor')
-    context.subscriptions.push(getTypeEvent())
-  } else if (typeEvent && !isMarkdown(editor)) {
+    extensionContext.subscriptions.push(getTypeEvent())
+  } else if (_typeEvent && !isMarkdown(editor)) {
     console.log('  >> Removing typeEvent for non-markdown editor')
     killTypeEvent()
   }
@@ -57,22 +76,8 @@ function deactivate() {
   killTypeEvent()
 }
 
-function appendBullet(editor, args) {
-  if (!isMarkdown(editor)) {
-    console.log(`  << Aborting: Not a markdown file`)
-    killTypeEvent()
-    return
-  }
-  console.log('  >> Passed isMarkdown check')
-
-  if (!isEnterKey(args)) return
-  console.log('  >> Passed isEnterKey check')
-
-  const lineText = getText(editor, getCursor(editor).line)
-  if (!lineText) return
-  console.log('  >> Passed getText check')
-
-  const bullet = getBullet(lineText)
+function appendBullet(text, args) {
+  const bullet = getBullet(text)
   if (!bullet) return
   console.log('  >> Passed getBullet check')
 
@@ -86,16 +91,20 @@ function getBullet(text) {
   return match[1]
 }
 
-function getCursor(editor) {
-  return editor.selection.active
+function getLineNumber(editor) {
+  return editor.selection?.active?.line
 }
 
-function getText(editor, line) {
-  return editor.document.lineAt(line)?.text
+function getLineText(editor) {
+  return editor.document.lineAt(getLineNumber(editor))?.text
+}
+
+function isBulletTextBlank(text) {
+  return text.match(BLANK_BULLET_REGEX)
 }
 
 function isEnterKey(args) {
-  return args.text == RETURN
+  return args.text == ENTER_KEY
 }
 
 function isMarkdown(editor) {
@@ -103,16 +112,27 @@ function isMarkdown(editor) {
 }
 
 function killTypeEvent() {
-  if (!typeEvent) return
-  typeEvent.dispose()
-  typeEvent = null
+  if (!_typeEvent) return
+  _typeEvent.dispose()
+  _typeEvent = null
+}
+
+async function removeLine(editor) {
+  await setLineText(editor, getLineNumber(editor), '')
+}
+
+async function setLineText(editor, lineNumber, text) {
+  const lineRange = editor.document.lineAt(lineNumber).range
+  if (!lineRange) return
+
+  await editor.edit(doc => { doc.replace(lineRange, text) })
 }
 
 module.exports = {
   activate,
   deactivate,
   testExports: {
-    RETURN,
+    ENTER_KEY,
     getBullet
   }
 }
