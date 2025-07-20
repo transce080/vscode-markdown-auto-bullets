@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "checkJs": false, /* Typecheck .js files. */
     "lib": [
       "ES2022"
     ],
