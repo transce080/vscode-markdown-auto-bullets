@@ -8,20 +8,16 @@ let _typeEvent = null
 const getTypeEvent = () => {
   _typeEvent ||=
     commands.registerCommand('type', async (args) => {
-      console.log('getEvent: type callback:', JSON.stringify(args))
       const editor = window.activeTextEditor
 
       if (!editor?.document || !args) return
 
       if (!isMarkdown(editor)) {
-        console.log(`  << Aborting: Not a markdown file`)
         killTypeEvent()
         return
       }
-      console.log('  >> Passed isMarkdown check')
 
       if (isEnterKey(args)) {
-        console.log('  >> Passed isEnterKey check')
         const lineText = getLineText(editor)
 
         if (isBulletTextBlank(lineText)) {
@@ -39,7 +35,6 @@ const getTypeEvent = () => {
 }
 
 function activate(/* Extension API */ context) {
-  console.log('## Extension activated')
 
   addOrRemoveEvent(context, window.activeTextEditor)
 
@@ -47,42 +42,34 @@ function activate(/* Extension API */ context) {
     /* When user changes documents */
     window.onDidChangeActiveTextEditor(editor => {
       if (!editor?.document) return
-      console.log(`!! onDidChangeActiveTextEditor: ${editor?.document?.languageId}`)
       addOrRemoveEvent(context, editor)
     }),
     /* When user changes doc language */
     workspace.onDidOpenTextDocument(() => {
       const editor = window.activeTextEditor
       if (!editor?.document) return
-      console.log(`!! onDidOpenTextDocument: ${editor?.document?.languageId} : ${editor?.contentChanges?.length}}`)
       addOrRemoveEvent(context, editor)
     }),
   )
 }
 
 function addOrRemoveEvent(extensionContext, editor) {
-  console.log(`  >> addOrRemoveEvent: [typeEvent: ${!!_typeEvent}] [isMarkdown: ${isMarkdown(editor)}]`)
-
   if (!_typeEvent && isMarkdown(editor)) {
-    console.log('  >> Adding typeEvent for markdown editor')
     extensionContext.subscriptions.push(getTypeEvent())
   } else if (_typeEvent && !isMarkdown(editor)) {
-    console.log('  >> Removing typeEvent for non-markdown editor')
     killTypeEvent()
   }
-}
-
-function deactivate() {
-  killTypeEvent()
 }
 
 function appendBullet(text, args) {
   const bullet = getBullet(text)
   if (!bullet) return
-  console.log('  >> Passed getBullet check')
 
   args.text += bullet
-  console.log('  >> Added bullet to args.text:', args.text)
+}
+
+function deactivate() {
+  killTypeEvent()
 }
 
 function getBullet(text) {
