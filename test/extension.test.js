@@ -4,12 +4,15 @@ const { CRLF, LF } = EndOfLine
 const { testExports } = require('../src/extension')
 const assert = require('assert')
 
-const { getBullet, RETURN } = testExports
+const { getBullet, ENTER_KEY } = testExports
 const WAIT_TIME = 150 // Increase wait time if you experience intermittent failures or for slower machines
 
 const testDepthOne = '  * Lorem Ipsum'
+const testDepthOneEmpty = '  * '
 const testDepthTwo = '    + Lorem Ipsum'
 const testDepthZero = '- Lorem Ipsum'
+const testDepthZeroEmpty = '- '
+const testDepthZeroPadded = '-    '
 const testLongIndent = '-  Lorem Ipsum'
 const testNoBullets = 'Lorem Ipsum'
 const testNoBulletsWithDashes = 'Lorem Ipsum - Dolor Sit Amet'
@@ -30,9 +33,9 @@ async function runTest(content, language = 'markdown', lineEnding = LF, secondLa
     await wait(WAIT_TIME)
   }
 
-  await commands.executeCommand('type', { text: RETURN })
+  await commands.executeCommand('type', { text: ENTER_KEY })
 
-  const newText = document.getText().split(RETURN).pop()
+  const newText = document.getText().split(ENTER_KEY).pop()
 
   await commands.executeCommand('workbench.action.closeAllEditors')
 
@@ -61,7 +64,7 @@ suite('Function Tests', () => {
   })
 })
 
-suite('Execution Tests', () => {
+suite('Insertion Tests', () => {
   test('Does not insert if not markdown', async () => {
     const newLine = await runTest(testDepthZero, 'plaintext')
     assert.strictEqual(newLine, '', 'New line should be blank')
@@ -139,5 +142,22 @@ suite('Execution Tests', () => {
     const newLine = await runTest(testDepthZero, 'plaintext', LF, 'markdown')
     const index = testDepthZero.indexOf('-') + 2
     assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
+  })
+})
+
+suite('Removal Tests', () => {
+  test('Removes the current line when the bullet has no text', async () => {
+    const newLine = await runTest(testDepthZeroEmpty)
+    assert.strictEqual(newLine, '', 'New line should be blank')
+  })
+
+  test('Removes the current line when the indented bullet has no text', async () => {
+    const newLine = await runTest(testDepthOneEmpty)
+    assert.strictEqual(newLine, '', 'New line should be blank')
+  })
+
+  test('Removes the current line when the bullet has a lot of whitespace', async () => {
+    const newLine = await runTest(testDepthZeroPadded)
+    assert.strictEqual(newLine, '', 'New line should be blank')
   })
 })

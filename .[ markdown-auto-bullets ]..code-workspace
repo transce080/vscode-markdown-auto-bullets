@@ -19,17 +19,17 @@
         "type": "extensionHost"
       },
       {
-        "type": "node",
-        "request": "attach",
         "name": "Attach to Process",
+        "request": "attach",
         "skipFiles": [
           ".vscode-test/**",
-          "**/.vscode/extensions/**"
+          "**/.vscode/extensions/**",
           "**/mocha/lib**",
-          "**/resources/app/out/vs/workbench/api/**"
+          "**/resources/app/out/vs/workbench/api/**",
           "**/vs/workbench/api/node/**",
           "node_modules/**"
-        ]
+        ],
+        "type": "node"
       }
     ],
     "version": "0.2.0"

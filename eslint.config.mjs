@@ -34,6 +34,7 @@ export default [
       "no-negated-condition": ["warn"],
       "no-promise-executor-return": ["warn"],
       "no-ternary": ["off"],
+      "no-underscore-dangle": ["off"],
       "no-use-before-define": ["off"],
       "no-warning-comments": ["warn"],
       "one-var": ["off"],
