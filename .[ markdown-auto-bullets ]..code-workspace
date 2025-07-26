@@ -14,7 +14,7 @@
     "configurations": [
       {
         "name": "Run Extension",
-        "program": "${workspaceFolder}/app.js",
+        "program": "${workspaceFolder}/src/extension.js",
         "request": "launch",
         "type": "extensionHost"
       },
@@ -22,12 +22,7 @@
         "name": "Attach to Process",
         "request": "attach",
         "skipFiles": [
-          ".vscode-test/**",
-          "**/.vscode/extensions/**",
-          "**/mocha/lib**",
-          "**/resources/app/out/vs/workbench/api/**",
-          "**/vs/workbench/api/node/**",
-          "node_modules/**"
+          ".vscode-test/**"
         ],
         "type": "node"
       }
@@ -38,6 +33,9 @@
     "cSpell.ignoreWords": [
       "dbaeumer"
     ],
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "files.exclude": {
+      "node_modules": true
+    }
   }
 }

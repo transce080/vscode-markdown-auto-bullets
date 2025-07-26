@@ -1,7 +1,7 @@
 const { commands, window, workspace } = require('vscode')
 
-const BULLET_REGEX = /^\s*([+*-]\s+)/u
 const BLANK_BULLET_REGEX = /^\s*([+*-]\s*)$/u
+const BULLET_REGEX = /^\s*([+*-]\s+)/u
 const ENTER_KEY = '\n'
 let _typeEvent = null
 
@@ -9,8 +9,8 @@ const getTypeEvent = () => {
   _typeEvent ||=
     commands.registerCommand('type', async (args) => {
       const editor = window.activeTextEditor
-
       if (!editor?.document || !args) return
+
       if (!isMarkdown(editor)) {
         killTypeEvent()
         return
@@ -41,14 +41,22 @@ function activate(/* Extension API */ context) {
     /* When user changes documents */
     window.onDidChangeActiveTextEditor(editor => {
       if (!editor?.document) return
+
       addOrRemoveEvent(context, editor)
     }),
     /* When user changes doc language */
     workspace.onDidOpenTextDocument(() => {
       const editor = window.activeTextEditor
       if (!editor?.document) return
+
       addOrRemoveEvent(context, editor)
     }),
+    commands.registerCommand('markdown-auto-bullets.deleteLeft', () => {
+      const editor = window.activeTextEditor
+      if (!editor?.document || !_typeEvent) return
+
+      backspaceEvent(editor)
+    })
   )
 }
 
@@ -65,6 +73,17 @@ function appendBullet(text, args) {
   if (!bullet) return
 
   args.text += bullet
+}
+
+async function backspaceEvent(editor) {
+  const lineText = getLineText(editor)
+
+  if (isBulletTextBlank(lineText)) {
+    await removeLine(editor)
+    return
+  }
+
+  await commands.executeCommand('deleteLeft')
 }
 
 function deactivate() {
@@ -111,7 +130,7 @@ async function setLineText(editor, lineNumber, text) {
   const lineRange = editor.document.lineAt(lineNumber).range
   if (!lineRange) return
 
-  await editor.edit(doc => { doc.replace(lineRange, text) })
+  await editor.edit(edit => { edit.replace(lineRange, text) })
 }
 
 module.exports = {

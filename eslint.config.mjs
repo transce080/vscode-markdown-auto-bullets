@@ -30,7 +30,7 @@ export default [
       "no-console": ["off"],
       "no-implicit-coercion": ["warn"],
       "no-inline-comments": ["off"],
-      "no-magic-numbers": ["error", { "ignore": [0, 1] }],
+      "no-magic-numbers": ["error", { "ignore": [-1, 0, 1] }],
       "no-negated-condition": ["warn"],
       "no-promise-executor-return": ["warn"],
       "no-ternary": ["off"],

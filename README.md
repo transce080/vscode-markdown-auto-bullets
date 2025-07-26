@@ -21,6 +21,10 @@ An open-source "mini-extension" which automatically adds bullet points when edit
 
 Initial release
 
+### 1.1.0
+
+Add backspace feature
+
 ## License
 
 - AGPL-3.0-or-later
@@ -37,3 +41,8 @@ Initial release
 ## Known Issues
 
 - None
+
+## Acknowledgments
+
+- [vscode-backspace extension](https://github.com/microsoft/vscode-backspace/tree/3c2054df2a7d8af7214ca601014520a17d458fa1) - backspace reference
+- [vscode docs](https://code.visualstudio.com/api/references/vscode-api) - basic api reference- [vscode source](https://github.com/microsoft/vscode) - additional api reference
