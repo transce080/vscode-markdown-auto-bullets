@@ -25,6 +25,10 @@ Initial release
 
 Add backspace feature
 
+### 1.1.1
+
+Bug fix
+
 ## License
 
 - AGPL-3.0-or-later

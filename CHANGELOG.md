@@ -9,3 +9,7 @@ All notable changes to the "markdown-auto-bullets" extension will be documented 
 ## 1.1.0
 
 - Add backspace feature
+
+## 1.1.1
+
+- Bug fix

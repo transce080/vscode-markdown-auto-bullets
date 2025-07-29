@@ -5,8 +5,8 @@ const { testExports } = require('../src/extension')
 const assert = require('assert')
 
 const { getBullet, ENTER_KEY } = testExports
-const BACKSPACE_KEY = '\b'
-const WAIT_TIME = 150 // Increase wait time if you experience intermittent failures or for slower machines
+const BACKSPACE_KEY = ''
+const WAIT_TIME = 200 // Increase wait time if you experience intermittent failures or for slower machines
 
 const testDepthOne = '  * Lorem Ipsum'
 const testDepthOneEmpty = '  * '
@@ -26,6 +26,7 @@ async function runTest(content, options = {}) {
     key = ENTER_KEY,
     language = 'markdown',
     lineEnding = LF,
+    lineNumber = null,
     secondLanguage = null
   } = options
 
@@ -49,13 +50,14 @@ async function runTest(content, options = {}) {
     await commands.executeCommand('type', { text: key })
   }
 
-  const newText = document.getText().split(ENTER_KEY).pop()
+  const linesOfText = document.getText().split(ENTER_KEY)
+  const result = lineNumber ? linesOfText[lineNumber - 1] : linesOfText.pop()
 
   if (closeOnExit) {
     await commands.executeCommand('workbench.action.closeAllEditors')
   }
 
-  return newText
+  return result
 }
 
 function setCursorPosition(editor, column, line) {
@@ -79,8 +81,14 @@ suite('Functional Tests', () => {
     assert.strictEqual(getBullet(testNoBulletsWithStar), null)
   })
 
-  test('Normal backspace event fires', async () => {
+  test('Normal backspace event fires in markdown', async () => {
     const newLine = await runTest(testNoBullets, { key: BACKSPACE_KEY })
+    const index = testNoBullets.length - 1
+    assert.strictEqual(newLine, testNoBullets.slice(0, index), 'Backspace should remove last character')
+  })
+
+  test('Normal backspace event fires in plaintext', async () => {
+    const newLine = await runTest(testNoBullets, { key: BACKSPACE_KEY, language: 'plaintext' })
     const index = testNoBullets.length - 1
     assert.strictEqual(newLine, testNoBullets.slice(0, index), 'Backspace should remove last character')
   })
@@ -89,6 +97,13 @@ suite('Functional Tests', () => {
     const newLine = await runTest(testNoBulletsWithDashes, { key: BACKSPACE_KEY })
     const index = testNoBulletsWithDashes.length - 1
     assert.strictEqual(newLine, testNoBulletsWithDashes.slice(0, index), 'Backspace should remove last character')
+  })
+
+  test('Normal backspace event fires when going from markdown to text', async () => {
+    await runTest(testNoBullets, { closeOnExit: false })
+    const newLine = await runTest(testNoBullets, { key: BACKSPACE_KEY, language: 'plaintext' })
+    const index = testNoBullets.length - 1
+    assert.strictEqual(newLine, testNoBullets.slice(0, index), 'Backspace should remove last character')
   })
 })
 
@@ -153,6 +168,11 @@ suite('Insertion Tests', () => {
 })
 
 suite('Removal Tests', () => {
+  test('Does not remove a single bullet character by itself on Enter', async () => {
+    const newLine = await runTest('-', { lineNumber: 1 })
+    assert.strictEqual(newLine, '-', 'Dash should remain')
+  })
+
   test('Removes the current line on Enter when the bullet has no text', async () => {
     const newLine = await runTest(testDepthZeroEmpty)
     assert.strictEqual(newLine, '', 'New line should be blank')

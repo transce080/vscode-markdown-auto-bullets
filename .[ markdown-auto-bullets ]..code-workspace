@@ -22,7 +22,8 @@
         "name": "Attach to Process",
         "request": "attach",
         "skipFiles": [
-          ".vscode-test/**"
+          ".vscode-test/**",
+          "node_modules/**"
         ],
         "type": "node"
       }

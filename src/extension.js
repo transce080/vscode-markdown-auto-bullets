@@ -1,6 +1,6 @@
 const { commands, window, workspace } = require('vscode')
 
-const BLANK_BULLET_REGEX = /^\s*([+*-]\s*)$/u
+const BLANK_BULLET_REGEX = /^\s*([+*-]\s+)$/u
 const BULLET_REGEX = /^\s*([+*-]\s+)/u
 const ENTER_KEY = '\n'
 let _typeEvent = null
@@ -53,7 +53,7 @@ function activate(/* Extension API */ context) {
     }),
     commands.registerCommand('markdown-auto-bullets.deleteLeft', () => {
       const editor = window.activeTextEditor
-      if (!editor?.document || !_typeEvent) return
+      if (!editor?.document) return
 
       backspaceEvent(editor)
     })
@@ -78,7 +78,7 @@ function appendBullet(text, args) {
 async function backspaceEvent(editor) {
   const lineText = getLineText(editor)
 
-  if (isBulletTextBlank(lineText)) {
+  if (_typeEvent && isBulletTextBlank(lineText)) {
     await removeLine(editor)
     return
   }
