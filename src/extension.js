@@ -34,7 +34,6 @@ const getTypeEvent = () => {
 }
 
 function activate(/* Extension API */ context) {
-
   addOrRemoveEvent(context, window.activeTextEditor)
 
   context.subscriptions.push(
@@ -51,11 +50,11 @@ function activate(/* Extension API */ context) {
 
       addOrRemoveEvent(context, editor)
     }),
-    commands.registerCommand('markdown-auto-bullets.deleteLeft', () => {
+    commands.registerCommand('markdown-auto-bullets.deleteLeft', async () => {
       const editor = window.activeTextEditor
       if (!editor?.document) return
 
-      backspaceEvent(editor)
+      await backspaceEvent(editor)
     })
   )
 }
