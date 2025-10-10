@@ -6,7 +6,6 @@ const assert = require('assert')
 
 const { getBullet, ENTER_KEY } = testExports
 const BACKSPACE_KEY = ''
-const WAIT_TIME = 200 // Increase wait time if you experience intermittent failures or for slower machines
 
 const testDepthOne = '  * Lorem Ipsum'
 const testDepthOneEmpty = '  * '
@@ -23,10 +22,12 @@ const testNoBulletsWithStar = 'Lorem Ipsum Dolor * Sit Amet'
 async function runTest(content, options = {}) {
   const {
     closeOnExit = true,
+    column = content.length,
     key = ENTER_KEY,
     language = 'markdown',
     lineEnding = LF,
     lineNumber = null,
+    row = 0,
     secondLanguage = null
   } = options
 
@@ -35,17 +36,14 @@ async function runTest(content, options = {}) {
 
   await editor.edit(edit => { edit.setEndOfLine(lineEnding) })
 
-  // Move cursor to end of line
-  setCursorPosition(editor, content.length, 0)
+  setCursorPosition(editor, column, row)
 
   if (secondLanguage) {
     await languages.setTextDocumentLanguage(document, secondLanguage)
-    await wait(WAIT_TIME)
   }
 
   if (key == BACKSPACE_KEY) {
     await commands.executeCommand('markdown-auto-bullets.deleteLeft')
-    await wait(WAIT_TIME)
   } else {
     await commands.executeCommand('type', { text: key })
   }
@@ -62,11 +60,6 @@ async function runTest(content, options = {}) {
 
 function setCursorPosition(editor, column, line) {
   editor.selection = new Selection(line, column, line, column)
-}
-
-async function wait(milliseconds) {
-  // eslint-disable-next-line no-promise-executor-return
-  return await new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
 suite('Functional Tests', () => {
@@ -107,34 +100,27 @@ suite('Functional Tests', () => {
   })
 })
 
-suite('Insertion Tests', () => {
+suite('Insertion Tests - Complex', () => {
+  test.skip('Does not insert if bullet already present at cursor', async () => {
+    const newLine = await runTest(`${testDepthZero}${testDepthZero}`, { column: testDepthZero.length })
+    assert.strictEqual(newLine, testDepthZero, 'New line should not have two bullets')
+  })
+
+  test.skip('Does not insert if bullet already present at line start', async () => {
+    const newLine = await runTest(testDepthZero, { column: 0 })
+    assert.strictEqual(newLine, testDepthZero, 'New line should not have two bullets')
+  })
+
+  test('Inserts if bullet present at cursor but wrong type', async () => {
+    const newLine = await runTest(`${testDepthZero}${testDepthTwo}`, { column: testDepthZero.length })
+    assert.strictEqual(newLine, `- ${testDepthTwo}`, 'New line should start with dash bullet')
+  })
+})
+
+suite('Insertion Tests - Language', () => {
   test('Does not insert if not markdown', async () => {
     const newLine = await runTest(testDepthZero, { language: 'plaintext' })
     assert.strictEqual(newLine, '', 'New line should be blank')
-  })
-
-  test('Inserts dash bullet point LF', async () => {
-    const newLine = await runTest(testDepthZero)
-    const index = testDepthZero.indexOf('-') + 2
-    assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
-  })
-
-  test('Inserts dash bullet point CRLF', async () => {
-    const newLine = await runTest(testDepthZero, { lineEnding: CRLF })
-    const index = testDepthZero.indexOf('-') + 2
-    assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
-  })
-
-  test('Inserts star bullet point', async () => {
-    const newLine = await runTest(testDepthOne)
-    const index = testDepthOne.indexOf('*') + 2
-    assert.strictEqual(newLine, testDepthOne.slice(0, index), 'New line should start with star bullet')
-  })
-
-  test('Inserts plus bullet point', async () => {
-    const newLine = await runTest(testDepthTwo)
-    const index = testDepthTwo.indexOf('+') + 2
-    assert.strictEqual(newLine, testDepthTwo.slice(0, index), 'New line should start with plus bullet')
   })
 
   test('Stops when going from markdown to text', async () => {
@@ -164,6 +150,32 @@ suite('Insertion Tests', () => {
     const newLine = await runTest(testDepthZero, { language: 'plaintext', secondLanguage: 'markdown' })
     const index = testDepthZero.indexOf('-') + 2
     assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
+  })
+})
+
+suite('Insertion Tests - Simple', () => {
+  test('Inserts dash bullet point LF', async () => {
+    const newLine = await runTest(testDepthZero)
+    const index = testDepthZero.indexOf('-') + 2
+    assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
+  })
+
+  test('Inserts dash bullet point CRLF', async () => {
+    const newLine = await runTest(testDepthZero, { lineEnding: CRLF })
+    const index = testDepthZero.indexOf('-') + 2
+    assert.strictEqual(newLine, testDepthZero.slice(0, index), 'New line should start with dash bullet')
+  })
+
+  test('Inserts star bullet point', async () => {
+    const newLine = await runTest(testDepthOne)
+    const index = testDepthOne.indexOf('*') + 2
+    assert.strictEqual(newLine, testDepthOne.slice(0, index), 'New line should start with star bullet')
+  })
+
+  test('Inserts plus bullet point', async () => {
+    const newLine = await runTest(testDepthTwo)
+    const index = testDepthTwo.indexOf('+') + 2
+    assert.strictEqual(newLine, testDepthTwo.slice(0, index), 'New line should start with plus bullet')
   })
 })
 
