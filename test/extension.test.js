@@ -50,7 +50,7 @@ async function runTest(content, options = {}) {
     await commands.executeCommand('type', { text: key })
   }
 
-  const linesOfText = document.getText().split(ENTER_KEY)
+  const linesOfText = document.getText().split(getLineEnding(lineEnding))
   const result = lineNumber ? linesOfText[lineNumber - 1] : linesOfText.pop()
 
   if (closeOnExit) {
@@ -103,12 +103,12 @@ suite('Functional Tests', () => {
 })
 
 suite('Insertion Tests - Complex', () => {
-  test.skip('Does not insert if bullet already present at cursor', async () => {
+  test('Does not insert if bullet already present at cursor', async () => {
     const newLine = await runTest(`${testDepthZero}${testDepthZero}`, { column: testDepthZero.length })
     assert.strictEqual(newLine, testDepthZero, 'New line should not have two bullets')
   })
 
-  test.skip('Does not insert if bullet already present at line start', async () => {
+  test('Does not insert if bullet already present at line start', async () => {
     const newLine = await runTest(testDepthZero, { column: 0 })
     assert.strictEqual(newLine, testDepthZero, 'New line should not have two bullets')
   })
@@ -217,6 +217,17 @@ suite('Removal Tests', () => {
     assert.strictEqual(newLine, '', 'New line should be blank')
   })
 })
+
+function getLineEnding(lineEnding) {
+  switch (lineEnding) {
+    case CRLF:
+      return '\r\n'
+    case LF:
+      return '\n'
+    default:
+      throw new Error('Invalid line ending')
+  }
+}
 
 // eslint-disable-next-line no-unused-vars
 async function wait(milliseconds) {

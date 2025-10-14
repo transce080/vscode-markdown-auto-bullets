@@ -27,7 +27,9 @@ const getTypeEvent = () => {
           return
         }
 
-        appendBullet(lineText, args)
+        if (!isBulletDuplicated(lineText)) {
+          appendBullet(lineText, args)
+        }
       }
 
       await commands.executeCommand('default:type', args)
@@ -107,12 +109,32 @@ function getBullet(text) {
 }
 
 
+function getColumnNumber() {
+  return editor().selection?.active?.character
+}
+
 function getLineNumber() {
   return editor()?.selection?.active?.line
 }
 
 function getLineText() {
   return editor()?.document.lineAt(getLineNumber())?.text
+}
+
+function isBulletDuplicated(lineText) {
+  const cursorColumn = getColumnNumber()
+
+  if (cursorColumn != lineText.length - 1) {
+    const subLineText = lineText.substring(cursorColumn, lineText.length - 1)
+    const subLineBullet = getBullet(subLineText)
+
+    if (subLineBullet) {
+      const bullet = getBullet(lineText)
+      return bullet == subLineBullet
+    }
+  }
+
+  return false
 }
 
 function isBulletTextBlank(text) {
