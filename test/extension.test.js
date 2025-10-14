@@ -1,3 +1,5 @@
+'use strict'
+
 const { commands, languages, window, workspace } = require('vscode')
 const { EndOfLine, Selection } = require('vscode')
 const { CRLF, LF } = EndOfLine
@@ -5,7 +7,7 @@ const { testExports } = require('../src/extension')
 const assert = require('assert')
 
 const { getBullet, ENTER_KEY } = testExports
-const BACKSPACE_KEY = ''
+const BACKSPACE_KEY = '\u0008'
 
 const testDepthOne = '  * Lorem Ipsum'
 const testDepthOneEmpty = '  * '
@@ -215,3 +217,8 @@ suite('Removal Tests', () => {
     assert.strictEqual(newLine, '', 'New line should be blank')
   })
 })
+
+// eslint-disable-next-line no-unused-vars
+async function wait(milliseconds) {
+  return await new Promise(resolve => { setTimeout(resolve, milliseconds) })
+}
