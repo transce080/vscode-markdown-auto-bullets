@@ -29,6 +29,14 @@ Add backspace feature
 
 Bug fix
 
+### 1.2.0
+
+Add detect-duplicate feature
+
+## 1.2.1
+
+Bug fix
+
 ## License
 
 - AGPL-3.0-or-later

@@ -1,9 +1,10 @@
 .gitignore
+.vscode-test*
 .vscode-test/**
 .vscode/**
-**/.vscode-test.*
-**/*.map
-**/eslint.config.mjs
-**/jsconfig.json
-deploy/**
+*.code-workspace
+build/**
+eslint.config.mjs
+jsconfig.json
+node_modules/**
 test/**

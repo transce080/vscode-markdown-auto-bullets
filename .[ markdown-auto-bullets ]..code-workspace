@@ -14,8 +14,8 @@
     "configurations": [
       {
         "name": "Run Extension",
-        "program": "${workspaceFolder}/src/extension.js",
         "request": "launch",
+        "runtimeExecutable": "${workspaceFolder}/src/extension.js",
         "type": "extensionHost"
       },
       {
@@ -36,6 +36,8 @@
     ],
     "editor.formatOnSave": true,
     "files.exclude": {
+      ".vscode-test": true,
+      "build": true,
       "node_modules": true
     }
   }

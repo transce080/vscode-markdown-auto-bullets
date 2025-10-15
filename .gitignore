@@ -1,5 +1,5 @@
 .env
 .vscode-test/
 *.vsix
-deploy/
+build/
 node_modules
