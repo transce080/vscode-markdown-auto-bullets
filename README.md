@@ -1,6 +1,7 @@
-# VSCode Markdown Automatic Bullet Points
+# Markdown Automatic Bullet Points
 
-An open-source "mini-extension" which automatically adds bullet points when editing in Markdown.
+An open-source "mini-extension" for [Visual Studio Code][Visual Studio Code]
+which automatically adds bullet points when editing in Markdown.
 
 ## Features
 
@@ -12,8 +13,8 @@ An open-source "mini-extension" which automatically adds bullet points when edit
 ## Usage
 
 - Press <kbd>Enter</kbd> to automatically insert a bullet on the next line
-- Press <kbd>Enter</kbd> twice to remove the inserted bullet
-- To create a new line without a bullet, press <kbd>Ctrl</kbd>+<kbd>Enter</kbd>
+- Press <kbd>Enter</kbd> or <kbd>Backspace</kbd> to remove a blank bulleted line
+- Alternatively, create a new line without a bullet by pressing <kbd>Ctrl</kbd>+<kbd>Enter</kbd>
 
 ## Release Notes
 
@@ -33,7 +34,7 @@ Bug fix
 
 Add detect-duplicate feature
 
-## 1.2.1
+### 1.2.1
 
 Bug fix
 
@@ -46,9 +47,13 @@ Bug fix
 
 - Jason Lonsberry (transce080)
 
-## Repository
+## Links
 
-- [GitHub Repository](https://github.com/transce080/vscode-markdown-auto-bullets/)
+- [Buy Me A Coffee](https://buymeacoffee.com/transce) - if you'd like to say thanks
+- [GitHub Repository](https://github.com/transce080/vscode-markdown-auto-bullets/) - this repo
+- [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jason-lonsberry.markdown-auto-bullets) - extension profile
+
+[Visual Studio Code]: https://code.visualstudio.com/ "code.visualstudio.com"
 
 ## Known Issues
 
@@ -57,4 +62,5 @@ Bug fix
 ## Acknowledgments
 
 - [vscode-backspace extension](https://github.com/microsoft/vscode-backspace/tree/3c2054df2a7d8af7214ca601014520a17d458fa1) - backspace reference
-- [vscode docs](https://code.visualstudio.com/api/references/vscode-api) - basic api reference- [vscode source](https://github.com/microsoft/vscode) - additional api reference
+- [vscode docs](https://code.visualstudio.com/api/references/vscode-api) - basic api reference
+- [vscode source](https://github.com/microsoft/vscode) - additional api reference

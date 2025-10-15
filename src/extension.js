@@ -108,7 +108,6 @@ function getBullet(text) {
   return match[1]
 }
 
-
 function getColumnNumber() {
   return editor().selection?.active?.character
 }
